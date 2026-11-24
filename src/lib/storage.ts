@@ -28,7 +28,7 @@ export const scopedStorage = {
 
   removeItem(key: string): void {
     try {
-      localStorage localStorage.removeItem(getKey(key));
+      localStorage.removeItem(getKey(key));
     } catch {
       // ignore
     }
