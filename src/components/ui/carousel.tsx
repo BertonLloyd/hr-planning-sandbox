@@ -15,10 +15,10 @@ type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
 type CarouselProps = {
-  opts?: CarallOptions
+  opts?: CarouselOptions
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
-  setApi?: (api: CarouselApi)
+  setApi?: (api: CarouselApi) => void
 }
 
 type CarouselContextProps = {
@@ -132,10 +132,7 @@ function Carousel({
   )
 }
 
-function CarouselContent({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel()
 
   return (
@@ -156,10 +153,7 @@ function CarouselContent({
   )
 }
 
-function CarouselItem({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
   const { orientation } = useCarousel()
 
   return (
@@ -194,7 +188,7 @@ function CarouselPrevious({
         "absolute size-8 rounded-full",
         orientation === "horizontal"
           ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          : "-top-12 left-1/2 -translate-y-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev}
@@ -223,8 +217,8 @@ function CarouselNext({
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2",
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 -right-12 -translate-y-1/2"
+          : "-bottom-12 left-1/2 -translate-y-1/2 rotate-90",
         className
       )}
       disabled={!canScrollNext}
