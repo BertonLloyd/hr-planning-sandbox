@@ -1,19 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Play, Clock, CheckCircle2, ArrowRight, Building2, Users, Sparkles } from 'lucide-react';
+import { Plus, Play, Clock, CheckCircle2, ArrowRight, Building2, Users, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
+import type { IPlanMeta } from '@/data/mockPlanData';
 import { usePlan } from '@/context/PlanContext';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { planList, createPlan, setCurrentPlan, loadDemoData } = usePlan();
+  const { planList, createPlan, setCurrentPlan, loadDemoData, deletePlan } = usePlan();
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<IPlanMeta | null>(null);
 
   const handleCreateFromTemplate = (template: 'general' | 'service') => {
     const id = createPlan(template);
@@ -31,6 +43,13 @@ export default function HomePage() {
   const handleContinuePlan = (id: string) => {
     setCurrentPlan(id);
     navigate('/workbench');
+  };
+
+  const handleConfirmDelete = () => {
+    if (!planToDelete) return;
+    deletePlan(planToDelete.id);
+    toast.success(`已删除方案「${planToDelete.name}」`);
+    setPlanToDelete(null);
   };
 
   return (
@@ -198,24 +217,38 @@ export default function HomePage() {
                     onClick={() => handleContinuePlan(plan.id)}
                   >
                     <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-base font-medium text-foreground truncate pr-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-base font-medium text-foreground truncate">
                           {plan.name}
                         </CardTitle>
-                        <Badge
-                          variant={plan.status === 'completed' ? 'default' : 'secondary'}
-                          className={cn(
-                            'shrink-0 text-xs',
-                            plan.status === 'completed' && 'bg-primary/10 text-primary border border-primary/20',
-                          )}
-                        >
-                          {plan.status === 'completed' ? (
-                            <CheckCircle2 className="size-3 mr-1" />
-                          ) : (
-                            <Clock className="size-3 mr-1" />
-                          )}
-                          {plan.status === 'completed' ? '已完成' : '进行中'}
-                        </Badge>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 text-muted-foreground hover:text-destructive"
+                            aria-label="删除方案"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPlanToDelete(plan);
+                            }}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                          <Badge
+                            variant={plan.status === 'completed' ? 'default' : 'secondary'}
+                            className={cn(
+                              'shrink-0 text-xs',
+                              plan.status === 'completed' && 'bg-primary/10 text-primary border border-primary/20',
+                            )}
+                          >
+                            {plan.status === 'completed' ? (
+                              <CheckCircle2 className="size-3 mr-1" />
+                            ) : (
+                              <Clock className="size-3 mr-1" />
+                            )}
+                            {plan.status === 'completed' ? '已完成' : '进行中'}
+                          </Badge>
+                        </div>
                       </div>
                       <CardDescription className="text-xs">
                         {plan.template === 'general' ? '通用模型' : '通用服务业'}模板
@@ -235,6 +268,32 @@ export default function HomePage() {
             </div>
           )}
         </motion.section>
+
+        {/* 删除确认 */}
+        <AlertDialog
+          open={!!planToDelete}
+          onOpenChange={(open) => {
+            if (!open) setPlanToDelete(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>删除方案</AlertDialogTitle>
+              <AlertDialogDescription>
+                将同时删除「{planToDelete?.name}」的全部数据与情景，且不可恢复。确认删除吗？
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>取消</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleConfirmDelete}
+              >
+                确认删除
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </div>
   );

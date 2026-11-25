@@ -85,7 +85,7 @@ function CommandInput({
 function CommandList({
   className,
   ...props
-}: React.ComponentProps<typeof CommandList>) {
+}: React.ComponentProps<typeof CommandPrimitive.List>) {
   return (
     <CommandPrimitive.List
       className={cn(
@@ -99,7 +99,7 @@ function CommandList({
 
 function CommandEmpty({
   ...props
-}: React.ComponentProps<typeof CommandEmpty> {
+}: React.ComponentProps<typeof CommandPrimitive.Empty>) {
   return (
     <CommandPrimitive.Empty
       data-slot="command-empty"
@@ -112,9 +112,9 @@ function CommandEmpty({
 function CommandGroup({
   className,
   ...props
-}: React.ComponentProps<typeof CommandGroup>) {
+}: React.ComponentProps<typeof CommandPrimitive.Group>) {
   return (
-    <CommandGroup
+    <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
         "text-foreground [&_[cmdk-group-heading]]:text-muted-foreground overflow-hidden p-1 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium",
@@ -128,9 +128,9 @@ function CommandGroup({
 function CommandSeparator({
   className,
   ...props
-}: React.ComponentProps<typeof CommandSeparator>) {
+}: React.ComponentProps<typeof CommandPrimitive.Separator>) {
   return (
-    <CommandSeparator
+    <CommandPrimitive.Separator
       data-slot="command-separator"
       className={cn("bg-border -mx-1 h-px", className)}
       {...props}
