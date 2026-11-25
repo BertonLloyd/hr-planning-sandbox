@@ -27,6 +27,7 @@ interface PlanContextType {
   setCurrentStep: (step: number) => void;
   saveScenario: (scenario: IScenario) => void;
   deleteScenario: (id: string) => void;
+  deletePlan: (id: string) => void;
   loadDemoData: () => void;
   computeMetrics: (data?: IPlanData | null, sandboxVars?: IPlanData['sandbox'] | null) => Metrics;
 }
@@ -356,6 +357,26 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setScenarios((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
+  const deletePlan = useCallback((id: string) => {
+    // 级联清理：删除该方案的明细数据与情景，避免留下孤儿数据
+    scopedStorage.removeItem(getPlanDataKey(id));
+    scopedStorage.removeItem(getScenariosKey(id));
+
+    const remaining = planList.filter((p) => p.id !== id);
+    setPlanList(remaining);
+
+    // 若删除的是当前方案，指针切到剩余第一个；没有剩余则清空
+    if (id === currentPlanId) {
+      if (remaining.length > 0) {
+        setCurrentPlanId(remaining[0].id);
+      } else {
+        setCurrentPlanId(null);
+        // currentPlanId 持久化 effect 只在有值时写入，置空需手动删除，避免刷新后回退到演示数据
+        scopedStorage.removeItem(CURRENT_PLAN_KEY);
+      }
+    }
+  }, [planList, currentPlanId]);
+
   const loadDemoData = useCallback(() => {
     const demoId = 'plan-demo';
     const demoName = '演示样例方案';
@@ -398,6 +419,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     setCurrentStep,
     saveScenario,
     deleteScenario,
+    deletePlan,
     loadDemoData,
     computeMetrics: (data, sandboxVars) => computeMetrics(data || currentPlanData, sandboxVars),
   };
